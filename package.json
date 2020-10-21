@@ -16,6 +16,7 @@
     "typescript": "^4.0.3"
   },
   "scripts": {
+    "bootstrap": "lerna bootstrap",
     "release": "cross-env HUSKY_BYPASS=true lerna publish"
   },
   "husky": {

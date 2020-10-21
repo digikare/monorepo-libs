@@ -24,6 +24,7 @@ monorepo-libs
 
 ```bash
 $ yarn
+$ yarn bootstrap
 ```
 
 ## How to create a new library
