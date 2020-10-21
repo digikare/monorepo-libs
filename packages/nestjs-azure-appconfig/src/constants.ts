@@ -1,0 +1,3 @@
+export const APP_CONFIG_OPTIONS = Symbol('APP_CONFIG_OPIONS');
+export const APP_CONFIG_INSTANCE = Symbol('APP_CONFIG_INSTANCE');
+export const APP_CONFIG_LABEL = Symbol('APP_CONFIG_LABEL');
