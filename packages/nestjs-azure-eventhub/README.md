@@ -28,6 +28,77 @@ $ npm install @digikare/nestjs-azure-eventhub
 $ yarn add @digikare/nestjs-azure-eventhub
 ```
 
+## How to use
+
+### Server
+
+```typescript
+import { EventHubServer } from '@digikare/nestjs-azure-eventhub';
+// other imports {...}
+
+const app = await NestFactory.createMicroservice(ApplicationModule, {
+  startegy: new EventHubServer(
+    '<connection_string>',        // the connection string
+    '<event_hub_name>',           // the event hub name
+    '<optional_consumer_group>',  // optionnal: The consumer group, the default value is $Default
+  ),
+});
+```
+
+You can also define a specific partitionId to listen if needed (useful for dev/test env).
+
+```typescript
+import { EventHubServer } from '@digikare/nestjs-azure-eventhub';
+// other imports {...}
+
+const app = await NestFactory.createMicroservice(ApplicationModule, {
+  startegy: new EventHubServer(
+    '<connection_string>',          // the connection string
+    '<event_hub_name>',             // the event hub name
+    '<optional_consumer_group>',    // optionnal: The consumer group, the default value is $Default
+    {
+      partitionId: '<partition_id>' // optional: the partitionId to listen
+    }
+  ),
+});
+```
+
+And now you can use `@EventPattern()` and `@MessagePattern()` decorators!
+
+### Client
+
+```typescript
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EventHubClient } from '@digikare/nestjs-azure-eventhub';
+
+@Module({
+  imports: [
+    ConfigModule,
+  ],
+  providers: {
+    {
+      provide: 'EVENT_HUB_CLIENT',
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const connectionString = configService.get<string>('EVENT_HUB_CONNECTION_STRING');
+        const eventHubName = configService.get<string>('EVENT_HUB_NAME');
+        const partitionId = configService.get<string>('EVENT_HUB_PARTITION_ID');
+
+        return new EventHubClient(
+          connectionString,
+          {
+            eventHubName: eventHubName,
+            partitionId: partitionId, // optional - define partitionId if you want sent to only
+          }
+        );
+      },
+    }
+  },
+})
+```
+
+Hint: When you define a partitionId, the configuration will override every message/event to send. Even if you provide a partitionID or partitionKey.
+
 ## Build
 
 ```bash
