@@ -28,18 +28,20 @@ export class EventHubConsumerService<T extends any> {
 
   constructor(
     readonly connectionString: string,
-    readonly consumeGroup: string = 'Default',
-    readonly name?: string,
+    readonly eventHubName: string,
+    readonly consumerGroup: string = 'Default',
     readonly options?: EventHubConsumerServiceOptions,
   ) {
 
     // extend with name if provided
-    if (name) {
-      this._debug = debug.extend(name);
-    }
+    this._debug = debug.extend(eventHubName);
 
     this._debug('ctor()');
-    this.client = new EventHubConsumerClient(this.consumeGroup, this.connectionString, options?.client);
+    this.client = new EventHubConsumerClient(
+      this.consumerGroup,
+      this.connectionString,
+      this.eventHubName,
+      options?.client);
     this.subscription = this.client.subscribe({
       processEvents: async (events, context) => this.processEvents(events, context),
       processError: async (err/*, context*/) => this.processError(err/*, context*/),

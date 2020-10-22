@@ -13,6 +13,7 @@ import {
   PartitionContext,
   SendBatchOptions,
   SubscriptionEventHandlers,
+  EventHubConsumerClientOptions,
 } from '@azure/event-hubs';
 import { Observable } from 'rxjs';
 import Debug from 'debug';
@@ -49,6 +50,8 @@ export interface EventHubServerOptions {
   serializer?: Serializer;
   deserializer?: Deserializer;
   withWildcardSupport?: boolean;
+
+  consumerClientOptions?: EventHubConsumerClientOptions;
 
   // define if a specific partitionId should be listened
   partitionId?: string;
@@ -103,6 +106,7 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
       this.consumerGroup,
       this.connectionString,
       this.eventHubName,
+      this.options?.consumerClientOptions,
     );
 
     debug(`subscribe`);

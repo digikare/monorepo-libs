@@ -25,15 +25,15 @@ export class EventHubProducerService {
 
   constructor(
     readonly connectionString: string,
-    readonly name?: string,
+    readonly eventHubName: string,
     readonly options?: EventHubProducerServiceOptions,
   ) {
 
-    if (name) {
-      this._debug = debug.extend(name);
+    if (eventHubName) {
+      this._debug = debug.extend(eventHubName);
     }
 
-    this.client = new EventHubProducerClient(connectionString, options?.client);
+    this.client = new EventHubProducerClient(connectionString, eventHubName, options?.client);
 
     if (options?.partitionId) {
       this._debug(`Ctor() - partitionId=${options.partitionId} is defined and forced`);

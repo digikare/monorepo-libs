@@ -9,7 +9,6 @@ import Debug from 'debug';
 import { EventHubProperties } from './contants';
 
 export interface EventHubClientOptions {
-  eventHubName?: string;
   partitionId?: string;
 }
 
@@ -22,13 +21,12 @@ export class EventHubClient extends ClientProxy {
 
   constructor(
     private readonly connectionString: string,
+    private readonly eventHubName: string,
     private readonly options?: EventHubClientOptions,
   ) {
     super();
 
-    if (this.options?.eventHubName) {
-      this.debug = this.debug.extend(this.options.eventHubName);
-    }
+    this.debug = this.debug.extend(this.eventHubName);
 
     const debug = this.debug.extend('ctor')
 
@@ -49,8 +47,8 @@ export class EventHubClient extends ClientProxy {
       return this.producer;
     }
 
-    if (this.options?.eventHubName) {
-      this.producer = new EventHubProducerClient(this.connectionString, this.options?.eventHubName);
+    if (this.eventHubName) {
+      this.producer = new EventHubProducerClient(this.connectionString, this.eventHubName);
     } else {
       this.producer = new EventHubProducerClient(this.connectionString);
     }

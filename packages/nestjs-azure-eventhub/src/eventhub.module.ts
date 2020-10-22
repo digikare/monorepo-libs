@@ -8,118 +8,129 @@ import {
   EventHubConsumerServiceOptions,
 } from './eventhub-consumer.service';
 import { EventHubProducerService } from './eventhub-producer.service';
+import {
+  EventHubClient,
+  EventHubClientOptions,
+} from './microservices';
 
-interface EventHubOptions {
+interface EventHubConfiguration {
   connectionString: string;
-  /**
-   * debugName for debug log
-   */
-  debugName?: string;
+  eventHubName: string;
   options?: EventHubConsumerServiceOptions;
 }
+type EventHubProducerOptions = FactoryOption<EventHubConfiguration>;
 
-interface EventHubConsumerOptions extends EventHubOptions {
-  consumerGroup: string;
-}
-
-interface EventHubFactoryConsumerOptions {
-  useFactory: (...args: unknown[]) => Promise<EventHubConsumerOptions>,
+interface FactoryOption<T> {
+  provide: string | symbol;
+  useFactory: (...args: unknown[]) => T|Promise<T>;
   inject?: any[];
+  imports?: any[];
 }
 
-interface EventHubFactoryProducerOptions {
-  useFactory: (...args: unknown[]) => Promise<EventHubOptions>;
-  inject?: any[];
+interface EventHubConsumerConfiguration extends EventHubConfiguration {
+  consumerGroup?: string;
 }
+
+type EventHubFactoryConsumerOptions = FactoryOption<EventHubConsumerConfiguration>;
+
+interface EventHubClientProxyConfiguration {
+  connectionString: string;
+  eventHubName: string;
+  options?: EventHubClientOptions;
+}
+
+type EventHubClientProxyOptions = FactoryOption<EventHubClientProxyConfiguration>;
 
 @Module({})
 export class EventHubModule {
 
-  static forProducer(
-    tokenName: string | symbol,
-    options: EventHubOptions,
+  static forClientProxy(
+    options: EventHubClientProxyOptions,
   ): DynamicModule {
+
+    const configToken = Symbol(`EventHub_ClientProxy_Config`);
+
+    const configProvider: Provider = {
+      provide: configToken,
+      inject: options.inject ?? [],
+      useFactory: options.useFactory,
+    };
+
     const provider: Provider = {
-      provide: tokenName,
-      useFactory: () => new EventHubProducerService(
-        options.connectionString,
-        options.debugName,
-        options.options,
+      provide: options.provide,
+      inject: [configToken],
+      useFactory: (opt: EventHubClientProxyConfiguration) => new EventHubClient(
+        opt.connectionString,
+        opt.eventHubName,
+        opt.options
       ),
     };
+
     return {
       module: EventHubModule,
-      providers: [provider],
+      imports: options.imports ?? [],
+      providers: [configProvider, provider],
       exports: [provider],
-    };
+    }
   }
 
-  static forProducerAsync(
-    tokenName: string | symbol,
-    options: EventHubFactoryProducerOptions,
+  static forProducer(
+    options: EventHubProducerOptions,
   ): DynamicModule {
-    const provider: Provider = {
-      provide: tokenName,
-      useFactory: async (...args: unknown[]) => {
-        const opt = await options.useFactory(...args);
-        return new EventHubProducerService(
-          opt.connectionString,
-          opt.debugName,
-          opt.options,
-        );
-      },
+
+    const configToken = Symbol(`EventHub_Producer_Config`);
+
+    const configProvider: Provider = {
+      provide: configToken,
       inject: options.inject ?? [],
+      useFactory: options.useFactory,
+    };
+
+    const provider: Provider = {
+      provide: options.provide,
+      inject: [configToken],
+      useFactory: (opt: EventHubConfiguration) => new EventHubProducerService(
+        opt.connectionString,
+        opt.eventHubName,
+        opt.options,
+      ),
     };
 
     return {
       module: EventHubModule,
-      providers: [provider],
+      imports: options.imports ?? [],
+      providers: [configProvider, provider],
       exports: [provider],
     };
   }
 
   static forConsumer(
-    tokenName: string | symbol,
-    options: EventHubConsumerOptions,
-  ): DynamicModule {
-    const provider: Provider = {
-      provide: tokenName,
-      useFactory: () => new EventHubConsumerService(
-        options.connectionString,
-        options.consumerGroup,
-        options.debugName,
-        options.options,
-      ),
-    };
-    return {
-      module: EventHubModule,
-      providers: [provider],
-      exports: [provider],
-    };
-  }
-
-  static forConsumerAsync(
-    tokenName: string | symbol,
     options: EventHubFactoryConsumerOptions
   ): DynamicModule {
 
-    const provider: Provider = {
-      provide: tokenName,
-      useFactory: async (...args: unknown[]) => {
-        const opt = await options.useFactory(...args);
-        return new EventHubConsumerService(
-          opt.connectionString,
-          opt.consumerGroup,
-          opt.debugName,
-          opt.options,
-        );
-      },
+    const configToken = Symbol(`EventHub_Consumer_Config`);
+
+    const configProvider: Provider = {
+      provide: configToken,
       inject: options.inject ?? [],
+      useFactory: options.useFactory,
+    };
+
+    const provider: Provider = {
+      provide: options.provide,
+      inject: [configToken],
+      useFactory: async (opt: EventHubConsumerConfiguration) => new EventHubConsumerService(
+        opt.connectionString,
+        opt.eventHubName,
+        opt.consumerGroup,
+        opt.options,
+      ),
     };
 
     return {
       module: EventHubModule,
-      providers: [provider],
+      imports: options.imports ?? [],
+      providers: [configProvider, provider],
       exports: [provider],
     };
   }
