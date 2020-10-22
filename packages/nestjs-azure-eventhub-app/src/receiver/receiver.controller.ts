@@ -8,7 +8,7 @@ export class ReceiverController {
 
   @EventPattern('test')
   handleTestEvent(data: any) {
-    this._logger.log(`======>> Receive event`, data);
+    this._logger.log(`======>> Receive event ${JSON.stringify(data)}`);
   }
 
 }

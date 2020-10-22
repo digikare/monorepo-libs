@@ -1,8 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class SenderService {
+
+  private _logger = new Logger(SenderService.name);
 
   constructor(
     @Inject('EH_CLIENT')
@@ -10,6 +12,7 @@ export class SenderService {
   ) {}
 
   sendEventHub() {
+    this._logger.log(`Emit event "test"`);
     this.client.emit('test', {
       date: new Date(),
       payload: {
