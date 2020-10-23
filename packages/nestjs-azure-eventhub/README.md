@@ -30,7 +30,7 @@ $ yarn add @digikare/nestjs-azure-eventhub
 
 ## How to use
 
-### Server
+### Microservice
 
 ```typescript
 import { EventHubServer } from '@digikare/nestjs-azure-eventhub';
@@ -109,26 +109,12 @@ $ yarn
 $ yarn build
 
 # watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+$ npm run dev
 ```
 
 ## Message Pattern
+
+When enabling
 
 When you receive a message, the client will cut out the topic of the event in order to check if handlers are subscribed to these topics.
 
@@ -136,11 +122,11 @@ When you receive a message, the client will cut out the topic of the event in or
 
 If you send an event on the following topic : event.subevent.topic
 The handlePatternMessage will test the following topics :
-*
-event.*
-event.subevent
-event.subevent.*
-event.subevent.topic
+- *
+- event.*
+- event.subevent
+- event.subevent.*
+- event.subevent.topic
 
 ## License
 
