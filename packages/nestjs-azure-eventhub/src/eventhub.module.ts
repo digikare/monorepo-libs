@@ -59,11 +59,16 @@ export class EventHubModule {
     const provider: Provider = {
       provide: options.provide,
       inject: [configToken],
-      useFactory: (opt: EventHubClientProxyConfiguration) => new EventHubClient(
-        opt.connectionString,
-        opt.eventHubName,
-        opt.options
-      ),
+      useFactory: (opt?: EventHubClientProxyConfiguration) => {
+        if (opt?.connectionString && opt?.eventHubName) {
+          return new EventHubClient(
+            opt.connectionString,
+            opt.eventHubName,
+            opt.options
+          );
+        }
+        return undefined;
+      },
     };
 
     return {
