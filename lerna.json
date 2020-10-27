@@ -1,7 +1,14 @@
 {
+  "lerna": "3.22.1",
   "packages": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "npmClient": "yarn",
-  "version": "independent"
+  "version": "independent",
+  "command": {
+    "publish": {
+      "conventionalCommits": true
+    }
+  }
 }
