@@ -1,11 +1,19 @@
 {
-  "name": "@digikare/nestjs-azure-eventhub-app",
-  "version": "1.0.0",
-  "description": "A project for testing nestjs-azure-eventhub",
-  "main": "index.js",
-  "author": "Tieu Philippe KHIM <pkhim@digikare.com>",
-  "license": "MIT",
+  "name": "@digikare/appconfig-demo-app",
+  "version": "0.0.0",
   "private": true,
+  "description": "Testing app for appConfig module",
+  "author": "Tieu-Philippe KHIM <khim.tieu.philippe@gmail.com>",
+  "homepage": "https://github.com/digikare/monorepo-libs#readme",
+  "license": "MIT",
+  "main": "lib/appconfig-demo-app.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
@@ -23,7 +31,6 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@digikare/nestjs-azure-eventhub": "^0.1.0",
     "@nestjs/common": "^7.1.1",
     "@nestjs/config": "^0.5.0",
     "@nestjs/core": "^7.1.1",
