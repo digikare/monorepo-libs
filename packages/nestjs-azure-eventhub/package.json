@@ -5,13 +5,18 @@
   "homepage": "https://github.com/digikare/monorepo-libs#readme",
   "main": "dist/index.js",
   "license": "MIT",
+  "author": "Tieu Philippe KHIM <pkhim@digikare.com>",
+  "contributors": [
+    "Mathieu BUSOLIN <mbusolin@digikare.com>"
+  ],
   "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "tsc -p tsconfig.build.json",
     "clean": "rimraf dist",
-    "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "format": "prettier --write \"lib/**/*.ts\" \"tests/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
+    "test": "jest --config ./tests/jest.json --runInBand",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
@@ -71,10 +76,6 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   },
-  "author": "Tieu Philippe KHIM <pkhim@digikare.com>",
-  "contributors": [
-    "Mathieu BUSOLIN <mbusolin@digikare.com>"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/digikare/monorepo-libs.git"

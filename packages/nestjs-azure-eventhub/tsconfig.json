@@ -8,10 +8,5 @@
     "noLib": false,
     "target": "ES2016",
     "sourceMap": false,
-    "outDir": "./dist",
-    "rootDir": "src",
   },
-  "include": [
-    "src/**/*"
-  ]
 }
