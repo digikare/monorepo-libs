@@ -1,0 +1,34 @@
+{
+  "folders": [
+    {
+      "name": "ROOT",
+      "path": "."
+    },
+    {
+      "path": "packages/nestjs-azure-appconfig"
+    },
+    {
+      "path": "packages/nestjs-azure-eventhub"
+    },
+    {
+      "path": "packages/app-appconfig-demo"
+    },
+    {
+      "path": "packages/app-eventhub-demo"
+    },
+    {
+      "path": "packages/eslint-config"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/.git": true,
+      "**/.svn": true,
+      "**/.hg": true,
+      "**/CVS": true,
+      "**/.DS_Store": true,
+      "**/node_modules/**": true,
+      "packages/*/*": true
+    }
+  }
+}
