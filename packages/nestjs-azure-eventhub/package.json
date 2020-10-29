@@ -81,5 +81,8 @@
   },
   "bugs": {
     "url": "https://github.com/digikare/monorepo-libs/issues"
+  },
+  "publishConfig": {
+    "tag": "next"
   }
 }
