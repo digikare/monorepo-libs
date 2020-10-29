@@ -1,0 +1,13 @@
+{
+  "name": "@shared/eslint-config",
+  "version": "0.0.0",
+  "description": "Shared eslint configuration",
+  "keywords": [],
+  "author": "Tieu-Philippe KHIM <pkhim@digikare.com>",
+  "license": "MIT",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  }
+}

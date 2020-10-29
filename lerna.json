@@ -9,7 +9,9 @@
       "conventionalCommits": true
     },
     "version": {
-      "allowBranch": "main"
+      "allowBranch": "main",
+      "message": "chore(release): release",
+      "push": false
     }
   }
 }
