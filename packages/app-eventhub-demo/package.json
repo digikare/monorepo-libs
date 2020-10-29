@@ -1,6 +1,5 @@
 {
   "name": "@digikare/app-eventhub-demo",
-  "version": "0.0.0",
   "description": "A project for testing nestjs-azure-eventhub",
   "main": "index.js",
   "author": "Tieu Philippe KHIM <pkhim@digikare.com>",
