@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppConfigModule } from '@digikare/nestjs-azure-appconfig';
 import { AppService } from './app.service';
@@ -7,9 +7,21 @@ import { AppService } from './app.service';
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    AppConfigModule.forConnectionString({
-      connectionString: process.env.APP_CONFIG_CONNECTION_STRING
+    // for async
+    AppConfigModule.forConnectionStringFactory({
+      useFactory: async (configService: ConfigService) => {
+        return {
+          connectionString: configService.get('APP_CONFIG_CONNECTION')
+        };
+      },
+      inject: [ConfigService],
+      imports: [ConfigModule],
     }),
+
+    // below for sync stuff
+    // AppConfigModule.forConnectionString({
+    //   connectionString: process.env.APP_CONFIG_CONNECTION
+    // }),
   ],
   controllers: [
     AppController,

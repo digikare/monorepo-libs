@@ -5,6 +5,9 @@ import {
   AppConfigModuleForRootOptionsGeneric,
   ConfigurationResultCacheEntry,
 } from './app-config.interfaces';
+import Debug from 'debug';
+
+const debug = Debug('AppConfig:Service');
 
 function getHashKey(key: string, label?: string) {
   return `${key}__#__${label}`;
@@ -30,12 +33,19 @@ export class AppConfigService {
     return this._options.label;
   }
 
+  /**
+   * Retreive a app config value
+   *
+   * @param {string} key The configuration key to load
+   * @param {string} label The label to use - set empty string to retrive without label
+   */
   async get<T>(key: string, label?: string): Promise<T|undefined> {
     try {
       const result = await this.getAsync(key, label);
       // return unique instance
       return JSON.parse(JSON.stringify(result?.value)) as unknown as T;
     } catch (err) {
+      debug(`error`, err);
       // if not 404 - an error occurred
       if (err.statusCode !== 404) {
         console.error(err);
@@ -45,9 +55,24 @@ export class AppConfigService {
 
   }
 
+  private getLabel(label: string|undefined): string|undefined {
+    if (label === undefined) {
+      return this.label;
+    }
+
+    // if empty string -> force undefined
+    if (label === '') {
+      return undefined;
+    }
+
+    return label ?? this.label;
+  }
+
   private async getAsync(key: string, label?: string): Promise<GetConfigurationSettingResponse> {
 
-    const hashKey = getHashKey(key, label ?? this.label);
+    const normalizeLabel = this.getLabel(label);
+
+    const hashKey = getHashKey(key, normalizeLabel);
 
     if (this.cache && this._data.has(hashKey)) {
 
@@ -55,13 +80,13 @@ export class AppConfigService {
 
       if (cacheEntry) {
         if (this._options.cache?.ttl === undefined) {
-          console.log(`[key=${key}] return cached value`);
+          debug(`[key=${key}] return cached value`);
           return cacheEntry;
         }
 
         const ttl = this._options.cache.ttl
         if (ttl > 0 && (Date.now() - cacheEntry.time) / 1000 < ttl) {
-          console.log(`[key=${key}] return cached value`);
+          debug(`[key=${key}] return cached value`);
           return cacheEntry;
         }
       }
@@ -69,7 +94,7 @@ export class AppConfigService {
 
     const result = await this._appConfigClient.getConfigurationSetting({
       key,
-      label: label ?? this.label,
+      label: normalizeLabel,
     });
 
     if (this.cache) {

@@ -6,22 +6,19 @@ import {
   AppConfigModuleForRootOptionsServicePrincipal,
   AppConfigModuleForRootOptionsConnectionString,
 } from './app-config.interfaces';
-import { APP_CONFIG_INSTANCE, APP_CONFIG_OPTIONS, APP_CONFIG_LABEL } from './constants';
+import { APP_CONFIG_INSTANCE, APP_CONFIG_OPTIONS } from './constants';
+import Debug from 'debug';
 
-function createProviders(
-  options: AppConfigModuleForRootOptionsServicePrincipal | AppConfigModuleForRootOptionsConnectionString,
-) {
-  return [
-    {
-      provide: APP_CONFIG_OPTIONS,
-      useValue: options,
-    },
-    {
-      provide: APP_CONFIG_LABEL,
-      useValue: options.label,
-    },
-    AppConfigService,
-  ];
+interface FactoryOptions<T> {
+  inject?: any[];
+  imports?: any[];
+  useFactory: (...args: any[]) => Promise<T> | T;
+}
+
+const debug = Debug('AppConfig:Module');
+
+function hideSecrets(cs: string) {
+  return cs.replace(/Secret=[^;]+/g, 'Secret=*********');
 }
 
 @Module({})
@@ -30,14 +27,28 @@ export class AppConfigModule {
   static forServicePrincipal(
     options: AppConfigModuleForRootOptionsServicePrincipal,
   ): DynamicModule {
+    return AppConfigModule.forServicePrincipalFactory({ useFactory: () => options });
+  }
+
+  static forServicePrincipalFactory(
+    factoryOption: FactoryOptions<AppConfigModuleForRootOptionsServicePrincipal>,
+  ): DynamicModule {
     return {
       module: AppConfigModule,
+      imports: [
+        ...(factoryOption.imports ?? [])
+      ],
       providers: [
+        {
+          provide: APP_CONFIG_OPTIONS,
+          useFactory: factoryOption.useFactory,
+          inject: factoryOption.inject ?? [],
+        },
         {
           provide: APP_CONFIG_INSTANCE,
           inject: [APP_CONFIG_OPTIONS],
           useFactory: (opts: AppConfigModuleForRootOptionsServicePrincipal) => {
-            const credential = options.credential ?? new DefaultAzureCredential();
+            const credential = opts.credential ?? new DefaultAzureCredential();
             const client = new AppConfigurationClient(
               opts.endpoint, // ex: <https://<your appconfig resource>.azconfig.io>
               credential,
@@ -46,7 +57,6 @@ export class AppConfigModule {
             return client;
           },
         },
-        ...createProviders(options),
       ],
       exports: [
         AppConfigService,
@@ -57,18 +67,35 @@ export class AppConfigModule {
   static forConnectionString(
     options: AppConfigModuleForRootOptionsConnectionString,
   ): DynamicModule {
+    return AppConfigModule.forConnectionStringFactory({ useFactory: () => options });
+  }
+
+  static forConnectionStringFactory(
+    factoryOption: FactoryOptions<AppConfigModuleForRootOptionsConnectionString>,
+  ): DynamicModule {
     return {
       module: AppConfigModule,
+      imports: [
+        ...(factoryOption.imports ?? []),
+      ],
       providers: [
+        {
+          provide: APP_CONFIG_OPTIONS,
+          useFactory: factoryOption.useFactory,
+          inject: [...(factoryOption.inject ?? [])],
+        },
         {
           provide: APP_CONFIG_INSTANCE,
           inject: [APP_CONFIG_OPTIONS],
           useFactory: (opts: AppConfigModuleForRootOptionsConnectionString) => {
+
+            debug(`ConnectionString`, hideSecrets(opts.connectionString));
+
             const client = new AppConfigurationClient(opts.connectionString);
             return client;
           },
         },
-        ...createProviders(options),
+        AppConfigService,
       ],
       exports: [
         AppConfigService,
