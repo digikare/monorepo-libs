@@ -9,6 +9,10 @@
   "contributors": [
     "Mathieu BUSOLIN <mbusolin@digikare.com>"
   ],
+  "publishConfig": {
+    "tag": "next",
+    "registry": "http://localhost:4873"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc -p tsconfig.build.json",
@@ -82,8 +86,5 @@
   },
   "bugs": {
     "url": "https://github.com/digikare/monorepo-libs/issues"
-  },
-  "publishConfig": {
-    "tag": "next"
   }
 }

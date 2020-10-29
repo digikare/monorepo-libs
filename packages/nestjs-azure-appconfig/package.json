@@ -7,6 +7,10 @@
   "license": "MIT",
   "author": "Tieu-Philippe KHIM <pkhim@digikare.com>",
   "contributors": [],
+  "publishConfig": {
+    "registry": "http://localhost:4873/",
+    "tag": "next"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc -p tsconfig.build.json",
@@ -65,8 +69,5 @@
     "configuration",
     "App Configuration",
     "AppConfig"
-  ],
-  "publishConfig": {
-    "tag": "next"
-  }
+  ]
 }
