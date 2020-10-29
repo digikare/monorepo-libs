@@ -18,8 +18,9 @@
     "typescript": "^4.0.3"
   },
   "scripts": {
-    "bootstrap": "lerna bootstrap",
-    "release": "cross-env HUSKY_BYPASS=true lerna publish"
+    "bootstrap": "cross-env lerna bootstrap",
+    "release": "cross-env HUSKY_BYPASS=true lerna publish",
+    "lint": "cross-env lerna run lint --parallel"
   },
   "husky": {
     "hooks": {
