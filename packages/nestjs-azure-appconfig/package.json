@@ -1,6 +1,6 @@
 {
   "name": "@digikare/nestjs-azure-appconfig",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "An azure app configuration module for nestjs",
   "homepage": "https://github.com/digikare/monorepo-libs#readme",
   "main": "dist/index.js",
