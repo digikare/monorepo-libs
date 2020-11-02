@@ -19,9 +19,8 @@
   },
   "scripts": {
     "bootstrap": "cross-env lerna bootstrap",
-    "release": "cross-env HUSKY_BYPASS=true lerna publish",
-    "lint": "cross-env lerna run lint --parallel",
-    "publish": "cross-env lerna publish --no-private"
+    "release": "cross-env HUSKY_BYPASS=true lerna publish --no-private",
+    "lint": "cross-env lerna run lint --parallel"
   },
   "husky": {
     "hooks": {
