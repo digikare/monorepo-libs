@@ -10,7 +10,7 @@
     },
     "version": {
       "allowBranch": "main",
-      "message": "chore(release): release",
+      "message": "chore(release): publish",
       "push": false
     }
   }
