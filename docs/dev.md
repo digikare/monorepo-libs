@@ -42,7 +42,7 @@ $ lerna exec -- yarn remove {package_name}
 ## How to publish
 
 ```bash
-$ lerna publish
+$ lerna publish --no-private
 ```
 
 # References
