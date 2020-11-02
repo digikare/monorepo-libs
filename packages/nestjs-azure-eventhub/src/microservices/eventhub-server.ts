@@ -77,7 +77,7 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
 
     this.logger.setContext(EventHubServer.name);
     this._debug = globalDebug.extend(consumerGroup);
-    this._debug(`ctor()`);
+    this._debug('ctor()');
 
     this.initializeDeserializer(this.options);
     this.initializeSerializer(this.options);
@@ -99,7 +99,7 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
 
     const debug = this._debug.extend('listen');
 
-    this.logger.debug(`listen()`);
+    this.logger.debug('listen()');
 
     this.producer = new EventHubProducerClient(this.connectionString, this.eventHubName);
     this.consumer = new EventHubConsumerClient(
@@ -109,8 +109,8 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
       this.options?.consumerClientOptions,
     );
 
-    debug(`subscribe`);
-    this.logger.debug(`listen() - subscribe`);
+    debug('subscribe');
+    this.logger.debug('listen() - subscribe');
 
     const subscribeHandler: SubscriptionEventHandlers = {
       processEvents: async (events: ReceivedEventData[], context: PartitionContext) => {
@@ -121,10 +121,10 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
         events.forEach((event) => this.handlePatternMessage(event, context));
       },
       processError: async (err: Error/*, context: PartitionContext*/) => {
-        this._debug(`Error: `, err);
+        this._debug('Error: ', err);
         this.logger.error(err);
       },
-    }
+    };
 
     if (this.options?.partitionId) {
       const partitionId = this.options.partitionId;
@@ -143,7 +143,7 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
       );
 
     } else {
-      debug(`Listen on patitionId=ALL`);
+      debug('Listen on patitionId=ALL');
       this.subscription = this.consumer.subscribe(subscribeHandler);
     }
 
@@ -166,13 +166,13 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
       return ;
     }
 
-    var splitPattern = event.properties.pattern.split(".");
+    const splitPattern = event.properties.pattern.split('.');
     for (let index = -1; index <= splitPattern.length; index++) {
       if (index === -1) {
         event.properties[EventHubProperties.TOPIC] = '*';
         this.handleMessage(event, context);
       } else {
-        var topic = splitPattern.slice(0, index).join('.');
+        const topic = splitPattern.slice(0, index).join('.');
         if (topic !== '') {
           event.properties[EventHubProperties.TOPIC] = topic;
           this.handleMessage(event, context);
@@ -211,7 +211,7 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
       return {
         ...pattern,
         reply: 'true',
-      }
+      };
     }
 
     return `${pattern}/reply`;
@@ -262,8 +262,8 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
     const debug = this._debug.extend('handleMessage');
 
     debug(`consumerGroup=${context.consumerGroup} - partitionId=${context.partitionId} partitionKey=${partitionKey} offset=${offset} enqueuedTimeUtc=${enqueuedTimeUtc} sequenceNumber=${sequenceNumber}`, body);
-    debug(`properties=`, properties);
-    debug(`body=`, body);
+    debug('properties=', properties);
+    debug('body=', body);
 
     const rawMessage = JSON.parse(body.toString());
 

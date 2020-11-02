@@ -9,12 +9,6 @@ import {
 import { APP_CONFIG_INSTANCE, APP_CONFIG_OPTIONS } from './constants';
 import Debug from 'debug';
 
-interface FactoryOptions<T> {
-  inject?: any[];
-  imports?: any[];
-  useFactory: (...args: any[]) => Promise<T> | T;
-}
-
 const debug = Debug('AppConfig:Module');
 
 function hideSecrets(cs: string) {
@@ -89,7 +83,7 @@ export class AppConfigModule {
           inject: [APP_CONFIG_OPTIONS],
           useFactory: (opts: AppConfigModuleForRootOptionsConnectionString) => {
 
-            debug(`ConnectionString`, hideSecrets(opts.connectionString));
+            debug('ConnectionString', hideSecrets(opts.connectionString));
 
             const client = new AppConfigurationClient(opts.connectionString);
             return client;
@@ -100,6 +94,6 @@ export class AppConfigModule {
       exports: [
         AppConfigService,
       ]
-    }
+    };
   }
 }

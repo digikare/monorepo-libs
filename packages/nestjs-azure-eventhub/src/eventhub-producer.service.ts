@@ -49,7 +49,7 @@ export class EventHubProducerService {
     // if a specific partitionId is defined, use it
     if (partitionId || this.partitionId) {
       sendOptions.partitionId = this.partitionId ?? partitionId;
-      this._debug(`override partitionId=${sendOptions.partitionId}`)
+      this._debug(`override partitionId=${sendOptions.partitionId}`);
     }
     // if no partitionId is defined, but a partitionKey is specify, use it
     if (sendOptions.partitionId === undefined && partitionKey) {

@@ -45,7 +45,7 @@ export class AppConfigService {
       // return unique instance
       return JSON.parse(JSON.stringify(result?.value)) as unknown as T;
     } catch (err) {
-      debug(`error`, err);
+      debug('error', err);
       // if not 404 - an error occurred
       if (err.statusCode !== 404) {
         console.error(err);
@@ -84,7 +84,7 @@ export class AppConfigService {
           return cacheEntry;
         }
 
-        const ttl = this._options.cache.ttl
+        const ttl = this._options.cache.ttl;
         if (ttl > 0 && (Date.now() - cacheEntry.time) / 1000 < ttl) {
           debug(`[key=${key}] return cached value`);
           return cacheEntry;

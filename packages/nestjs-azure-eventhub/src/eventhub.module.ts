@@ -48,7 +48,7 @@ export class EventHubModule {
     options: EventHubClientProxyOptions,
   ): DynamicModule {
 
-    const configToken = Symbol(`EventHub_ClientProxy_Config`);
+    const configToken = Symbol('EventHub_ClientProxy_Config');
 
     const configProvider: Provider = {
       provide: configToken,
@@ -76,14 +76,14 @@ export class EventHubModule {
       imports: options.imports ?? [],
       providers: [configProvider, provider],
       exports: [provider],
-    }
+    };
   }
 
   static forProducer(
     options: EventHubProducerOptions,
   ): DynamicModule {
 
-    const configToken = Symbol(`EventHub_Producer_Config`);
+    const configToken = Symbol('EventHub_Producer_Config');
 
     const configProvider: Provider = {
       provide: configToken,
@@ -113,7 +113,7 @@ export class EventHubModule {
     options: EventHubFactoryConsumerOptions
   ): DynamicModule {
 
-    const configToken = Symbol(`EventHub_Consumer_Config`);
+    const configToken = Symbol('EventHub_Consumer_Config');
 
     const configProvider: Provider = {
       provide: configToken,

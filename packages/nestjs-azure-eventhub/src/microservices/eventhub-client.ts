@@ -28,7 +28,7 @@ export class EventHubClient extends ClientProxy {
 
     this.debug = this.debug.extend(this.eventHubName);
 
-    const debug = this.debug.extend('ctor')
+    const debug = this.debug.extend('ctor');
 
     this.initializeSerializer({});
     this.initializeDeserializer({});
@@ -41,7 +41,7 @@ export class EventHubClient extends ClientProxy {
 
   async connect(): Promise<EventHubProducerClient> {
 
-    this.debug(`connect() called`);
+    this.debug('connect() called');
 
     if (this.producer) {
       return this.producer;
@@ -78,7 +78,7 @@ export class EventHubClient extends ClientProxy {
       }
 
       debug(`partitionId=${sendOptions.partitionId}`);
-      debug(`event`, event);
+      debug('event', event);
 
       await this.producer.sendBatch([ event ], sendOptions);
 
@@ -92,7 +92,7 @@ export class EventHubClient extends ClientProxy {
   ): Function {
 
     const debug = this.debug.extend('publish()');
-    debug(`publish() called`);
+    debug('publish() called');
 
     try {
 
@@ -117,7 +117,7 @@ export class EventHubClient extends ClientProxy {
         debug(`force partitionId=${sendOption.partitionId}`);
       }
 
-      debug(`event`, event);
+      debug('event', event);
       this.producer?.sendBatch([ event ], sendOption);
 
       this.routingMap.set(packet.id, callback);
@@ -128,7 +128,7 @@ export class EventHubClient extends ClientProxy {
 
     } catch (err) {
 
-      debug(`error`, err);
+      debug('error', err);
 
       callback({ err });
 
@@ -156,7 +156,7 @@ export class EventHubClient extends ClientProxy {
         pattern,
         date: (new Date()).toISOString(),
       },
-    }
+    };
 
     return event;
   }

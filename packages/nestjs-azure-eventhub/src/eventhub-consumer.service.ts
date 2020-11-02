@@ -57,11 +57,11 @@ export class EventHubConsumerService<T extends any> {
     events.forEach((evt) => {
       const body: T = evt.body;
       this._event$.next(body);
-    })
+    });
   }
 
   private processError(err/*, context*/) {
-    this._debug(`Error:`, err);
+    this._debug('Error:', err);
   }
 
 }
