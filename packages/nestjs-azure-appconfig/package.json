@@ -8,6 +8,7 @@
   "author": "Tieu-Philippe KHIM <pkhim@digikare.com>",
   "contributors": [],
   "publishConfig": {
+    "access": "public",
     "tag": "next"
   },
   "scripts": {

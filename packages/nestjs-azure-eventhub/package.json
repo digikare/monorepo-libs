@@ -10,6 +10,7 @@
     "Mathieu BUSOLIN <mbusolin@digikare.com>"
   ],
   "publishConfig": {
+    "access": "public",
     "tag": "next"
   },
   "scripts": {
