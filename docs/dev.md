@@ -30,7 +30,7 @@ $ yarn init
 
 ```bash
 $ cd packages/{working_package_name}
-$ npx lerna add @digikare/{dep_package_name} --scope=@digikare/{working_package_name}
+$ yarn lerna add @digikare/{dep_package_name} --scope=@digikare/{working_package_name}
 ```
 
 ## How to remove a dependency
@@ -42,7 +42,7 @@ $ lerna exec -- yarn remove {package_name}
 ## How to publish
 
 ```bash
-$ lerna publish --no-private
+$ yarn release
 ```
 
 # References
