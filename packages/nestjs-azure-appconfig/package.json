@@ -8,7 +8,6 @@
   "author": "Tieu-Philippe KHIM <pkhim@digikare.com>",
   "contributors": [],
   "publishConfig": {
-    "registry": "http://localhost:4873/",
     "tag": "next"
   },
   "scripts": {
