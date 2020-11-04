@@ -5,6 +5,7 @@
   "author": "Tieu-Philippe KHIM <khim.tieu.philippe@gmail.com>",
   "homepage": "https://github.com/digikare/monorepo-libs#readme",
   "license": "MIT",
+  "version": "0.0.0",
   "main": "lib/appconfig-demo-app.js",
   "directories": {
     "lib": "lib",
@@ -29,7 +30,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@digikare/nestjs-azure-appconfig": "^0.0.0",
+    "@digikare/nestjs-azure-appconfig": "*",
     "@nestjs/common": "^7.1.1",
     "@nestjs/config": "^0.5.0",
     "@nestjs/core": "^7.1.1",

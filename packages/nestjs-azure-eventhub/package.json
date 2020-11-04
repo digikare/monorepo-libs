@@ -27,10 +27,12 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "precommit": "lint-staged"
   },
+  "peerDependencies": {
+    "@nestjs/microservices": "^7.0.0",
+    "@nestjs/platform-express": "^7.0.0"
+  },
   "dependencies": {
     "@azure/event-hubs": "^5.2.2",
-    "@nestjs/microservices": "^7.4.4",
-    "@nestjs/platform-express": "^7.1.1",
     "debug": "^4.1.1",
     "minimatch": "^3.0.4",
     "reflect-metadata": "^0.1.13",
