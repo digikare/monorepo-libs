@@ -131,7 +131,8 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
         this.consumerGroup,
         this.connectionString,
         this.eventHubName,
-        checkpointStore
+        checkpointStore,
+        this.options?.consumerClientOptions,
       );
     } else {
       this.consumer = new EventHubConsumerClient(
