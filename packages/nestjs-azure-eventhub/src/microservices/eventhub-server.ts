@@ -20,6 +20,8 @@ import Debug from 'debug';
 import { BaseRpcContext } from '@nestjs/microservices/ctx-host/base-rpc.context';
 import { EventHubProperties } from './contants';
 import { isObject } from '@nestjs/common/utils/shared.utils';
+import { ContainerClient } from '@azure/storage-blob';
+import { BlobCheckpointStore } from '@azure/eventhubs-checkpointstore-blob';
 
 const globalDebug = Debug('eventhub:server');
 
@@ -46,6 +48,11 @@ export class EventHubContext extends BaseRpcContext<EventHubContextArgs> {
   }
 }
 
+export interface EventHubCheckpointStore {
+  connectionString: string;
+  containerName: string;
+}
+
 export interface EventHubServerOptions {
   serializer?: Serializer;
   deserializer?: Deserializer;
@@ -55,10 +62,10 @@ export interface EventHubServerOptions {
 
   // define if a specific partitionId should be listened
   partitionId?: string;
+  checkpointStore?: EventHubCheckpointStore;
 }
 
 export class EventHubServer extends Server implements CustomTransportStrategy {
-
   private producer?: EventHubProducerClient;
   private consumer?: EventHubConsumerClient;
   private subscription?: Subscription;
@@ -96,31 +103,80 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
   }
 
   public async listen(callback: () => void) {
-
     const debug = this._debug.extend('listen');
 
     this.logger.debug('listen()');
 
-    this.producer = new EventHubProducerClient(this.connectionString, this.eventHubName);
-    this.consumer = new EventHubConsumerClient(
-      this.consumerGroup,
+    this.producer = new EventHubProducerClient(
       this.connectionString,
       this.eventHubName,
-      this.options?.consumerClientOptions,
     );
+
+    if (this.options?.checkpointStore) {
+      const containerClient = new ContainerClient(
+        this.options.checkpointStore.connectionString,
+        this.options.checkpointStore.containerName,
+      );
+
+      if (!(await containerClient.exists())) {
+        this.logger.debug("Checkpoint container creation");
+        await containerClient.create();
+      } else {
+        this.logger.debug("Checkpoint container already exist");
+      }
+
+      const checkpointStore = new BlobCheckpointStore(containerClient);
+
+      this.consumer = new EventHubConsumerClient(
+        this.consumerGroup,
+        this.connectionString,
+        this.eventHubName,
+        checkpointStore,
+        this.options?.consumerClientOptions,
+      );
+    } else {
+      this.consumer = new EventHubConsumerClient(
+        this.consumerGroup,
+        this.connectionString,
+        this.eventHubName,
+        this.options?.consumerClientOptions,
+      );
+    }
 
     debug('subscribe');
     this.logger.debug('listen() - subscribe');
 
     const subscribeHandler: SubscriptionEventHandlers = {
-      processEvents: async (events: ReceivedEventData[], context: PartitionContext) => {
+      processEvents: async (
+        events: ReceivedEventData[],
+        context: PartitionContext,
+      ) => {
         if (events.length > 0) {
           this._debug(`Receive ${events.length} messages`);
           this.logger.debug(`Receive ${events.length} messages`);
+        } else {
+          return;
         }
         events.forEach((event) => this.handlePatternMessage(event, context));
+
+        try {
+          if(this.options?.checkpointStore){
+            this.logger.debug("Update Checkpoint");
+            await context.updateCheckpoint(events[events.length - 1]);
+          }
+        } catch (err) {
+          this.logger.error(`Error when checkpointing on partition ${context.partitionId}: `, err);
+          throw err;
+        }
+
+        this.logger.debug(
+          `Successfully checkpointed event with sequence number: ${
+            events[events.length - 1].sequenceNumber
+          } from partition: ${context.partitionId}`
+        );
+
       },
-      processError: async (err: Error/*, context: PartitionContext*/) => {
+      processError: async (err: Error /*, context: PartitionContext*/) => {
         this._debug('Error: ', err);
         this.logger.error(err);
       },
@@ -141,29 +197,26 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
         partitionId,
         subscribeHandler,
       );
-
     } else {
       debug('Listen on patitionId=ALL');
       this.subscription = this.consumer.subscribe(subscribeHandler);
     }
 
     callback();
-
   }
 
   private async handlePatternMessage(
     event: ReceivedEventData,
     context: PartitionContext,
   ) {
-
     if (!this.wildcardSupport) {
       this.handleMessage(event, context);
-      return ;
+      return;
     }
 
     if (event.properties === undefined) {
       this.handleMessage(event, context);
-      return ;
+      return;
     }
 
     const splitPattern = event.properties.pattern.split('.');
@@ -191,10 +244,10 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
     sequenceNumber,
     pattern,
   }: {
-    partitionId?: string,
-    partitionKey?: string,
-    sequenceNumber: number,
-    pattern: string,
+    partitionId?: string;
+    partitionKey?: string;
+    sequenceNumber: number;
+    pattern: string;
   }): any {
     return (data: WritePacket) => {
       this._debug(`handleMessage - sequenceNumber=${sequenceNumber}`);
@@ -206,7 +259,6 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
   }
 
   getReplyPattern(pattern) {
-
     if (isObject(pattern)) {
       return {
         ...pattern,
@@ -218,7 +270,7 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
   }
 
   initializeDeserializer(options?: EventHubServerOptions) {
-    if (options ?.deserializer) {
+    if (options?.deserializer) {
       this.deserializer = options?.deserializer;
     } else {
       super.initializeDeserializer(options);
@@ -226,22 +278,28 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
   }
 
   initializeSerializer(options?: EventHubServerOptions) {
-    if (options ?.serializer) {
+    if (options?.serializer) {
       this.serializer = options?.serializer;
     } else {
       super.initializeSerializer(options);
     }
   }
 
-  private async sendMessage(message: WritePacket, pattern: string, options?: SendBatchOptions) {
+  private async sendMessage(
+    message: WritePacket,
+    pattern: string,
+    options?: SendBatchOptions,
+  ) {
     this._debug('sendMessage() called');
     await this.producer?.sendBatch(
-      [{
-        body: JSON.stringify(message),
-        properties: {
-          [EventHubProperties.TOPIC]: pattern,
-        }
-      }],
+      [
+        {
+          body: JSON.stringify(message),
+          properties: {
+            [EventHubProperties.TOPIC]: pattern,
+          },
+        },
+      ],
       options,
     );
   }
@@ -261,16 +319,20 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
 
     const debug = this._debug.extend('handleMessage');
 
-    debug(`consumerGroup=${context.consumerGroup} - partitionId=${context.partitionId} partitionKey=${partitionKey} offset=${offset} enqueuedTimeUtc=${enqueuedTimeUtc} sequenceNumber=${sequenceNumber}`, body);
+    debug(
+      `consumerGroup=${context.consumerGroup} - partitionId=${context.partitionId} partitionKey=${partitionKey} offset=${offset} enqueuedTimeUtc=${enqueuedTimeUtc} sequenceNumber=${sequenceNumber}`,
+      body,
+    );
     debug('properties=', properties);
     debug('body=', body);
 
     const rawMessage = JSON.parse(body.toString());
 
     const packet = this.deserializer.deserialize(rawMessage, {
-      channel: properties?.pattern
+      channel: properties?.pattern,
     });
-    const pattern = properties && properties[EventHubProperties.TOPIC] || packet.pattern;
+    const pattern =
+      (properties && properties[EventHubProperties.TOPIC]) || packet.pattern;
     const ctx = new EventHubContext([context, pattern]);
 
     if (!properties || properties[EventHubProperties.ID] === undefined) {
@@ -297,6 +359,4 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
     ) as Observable<any>;
     response$ && this.send(response$, publish);
   }
-
-
 }
