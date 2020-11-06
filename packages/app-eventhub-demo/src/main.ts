@@ -15,14 +15,14 @@ async function bootstrapReceiver() {
 
   app.connectMicroservice<MicroserviceOptions>({
     strategy: new EventHubServer(
-      configService.get<string>('EVENT_HUB_LISTENER_CONNECTION_STRING'),
-      configService.get<string>('EVENT_HUB_NAME'),
-      configService.get<string>('EVENT_HUB_LISTENER_CONSUMER_GROUP') ?? '$Default',
+      configService.get<string>('EVENT_HUB_CONSUMER_CONNECTION_STRING'),
+      configService.get<string>('EVENT_HUB_CONSUMER_NAME'),
+      configService.get<string>('EVENT_HUB_CONSUMER_GROUP') ?? '$Default',
       {
-        partitionId: configService.get<string>('EVENT_HUB_LISTENER_PARTITION_ID'),
+        partitionId: configService.get<string>('EVENT_HUB_CONSUMER_PARTITION_ID'),
         checkpointStore: {
-          connectionString: configService.get<string>('EVENT_HUB_LISTENER_CHECKPOINT_CONTAINER_CONNECTION_STRING'),
-          containerName: configService.get<string>('EVENT_HUB_LISTENER_CHECKPOINT_CONTAINER_NAME'),
+          connectionString: configService.get<string>('EVENT_HUB_CONSUMER_CHECKPOINT_CONTAINER_CONNECTION_STRING'),
+          containerName: configService.get<string>('EVENT_HUB_CONSUMER_CHECKPOINT_CONTAINER_NAME'),
         }
       }
     ),
