@@ -2,6 +2,7 @@
   "name": "app-eventhub-demo",
   "description": "A project for testing nestjs-azure-eventhub",
   "main": "index.js",
+  "version": "0.0.0",
   "author": "Tieu Philippe KHIM <pkhim@digikare.com>",
   "license": "MIT",
   "private": true,
@@ -21,9 +22,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@digikare/nestjs-azure-eventhub": "^0.1.0",
+    "@digikare/nestjs-azure-eventhub": "file:../nestjs-azure-eventhub",
     "@nestjs/common": "^7.1.1",
-    "@nestjs/config": "^0.5.0",
+    "@nestjs/config": "0.5.0",
     "@nestjs/core": "^7.1.1",
     "@nestjs/microservices": "^7.1.1",
     "@nestjs/platform-express": "^7.1.1",
