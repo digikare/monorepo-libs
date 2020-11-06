@@ -13,10 +13,10 @@ import { SenderService } from './sender.service';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         return {
-          connectionString: configService.get<string>('EVENT_HUB_PRODUCER_CONNECTION_STRING'),
-          eventHubName: configService.get<string>('EVENT_HUB_PRODUCER_NAME'),
+          connectionString: configService.get<string>('EVENT_HUB_SENDER_CONNECTION_STRING'),
+          eventHubName: configService.get<string>('EVENT_HUB_SENDER_NAME'),
           options: {
-            partitionId: configService.get<string>('EVENT_HUB_PRODUCER_PARTITION_ID'),
+            partitionId: configService.get<string>('EVENT_HUB_SENDER_PARTITION_ID'),
           },
         };
       }
@@ -28,10 +28,10 @@ import { SenderService } from './sender.service';
     //   inject: [ConfigService],
     //   useFactory: (configService: ConfigService) => {
     //     return new EventHubClient(
-    //       configService.get<string>('EVENT_HUB_PRODUCER_CONNECTION_STRING'),
-    //       configService.get<string>('EVENT_HUB_PRODUCER_NAME'),
+    //       configService.get<string>('EVENT_HUB_SENDER_CONNECTION_STRING'),
+    //       configService.get<string>('EVENT_HUB_SENDER_NAME'),
     //       {
-    //         partitionId: configService.get<string>('EVENT_HUB_PRODUCER_PARTITION_ID'),
+    //         partitionId: configService.get<string>('EVENT_HUB_SENDER_PARTITION_ID'),
     //       }
     //     );
     //   }
