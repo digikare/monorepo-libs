@@ -64,6 +64,32 @@ const app = await NestFactory.createMicroservice(ApplicationModule, {
 
 And now you can use `@EventPattern()` and `@MessagePattern()` decorators!
 
+#### Checkpoint store
+
+Since 0.1.2, you can add a checkpoint store, that allow your app to treat pending message.
+
+You will need an azure account storage in order to make it works.
+
+```typescript
+import { EventHubServer } from '@digikare/nestjs-azure-eventhub';
+// other imports {...}
+
+const app = await NestFactory.createMicroservice(ApplicationModule, {
+  startegy: new EventHubServer(
+    '<connection_string>',            // the connection string
+    '<event_hub_name>',               // the event hub name
+    '<optional_consumer_group>',      // optionnal: The consumer group, the default value is $Default
+    {
+      partitionId: '<partition_id>',  // optional: the partitionId to listen
+      checkpointStore: {
+        connectionString: '<checkpoint_account_storage_connection_string>',
+        containerName: '<checkpoint_container_name>',
+      }
+    }
+  ),
+});
+```
+
 ### Client
 
 ```typescript
@@ -81,7 +107,7 @@ import { EventHubClient } from '@digikare/nestjs-azure-eventhub';
       useFactory: (configService: ConfigService) => {
         const connectionString = configService.get<string>('EVENT_HUB_CONNECTION_STRING');
         const eventHubName = configService.get<string>('EVENT_HUB_NAME');
-        const partitionId = configService.get<string>('EVENT_HUB_PARTITION_ID');
+        const partitionId = configService.get<string>('EVENT_HUB_PARTITION_ID'); // optionnal
 
         return new EventHubClient(
           connectionString,

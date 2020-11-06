@@ -45,6 +45,12 @@ $ lerna exec -- yarn remove {package_name}
 $ yarn release
 ```
 
+## To update a package version to latest
+
+```bash
+$ npm dist-tags add {package_name}@version latest
+```
+
 # References
 
 - https://medium.com/@jsilvax/a-workflow-guide-for-lerna-with-yarn-workspaces-60f97481149d
