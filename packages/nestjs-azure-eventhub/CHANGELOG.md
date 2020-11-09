@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.3](https://github.com/digikare/monorepo-libs/compare/@digikare/nestjs-azure-eventhub@0.1.2...@digikare/nestjs-azure-eventhub@0.1.3) (2020-11-09)
+
+
+### Bug Fixes
+
+* **eventhub:** rename withWildcardSupport for wildcardSupport ([59dc651](https://github.com/digikare/monorepo-libs/commit/59dc651c3fcfa96bd02879492c037511602d72f3))
+* **eventhub:** some fix and improvment ([fb6f44c](https://github.com/digikare/monorepo-libs/commit/fb6f44c6339f1267af599697b3799c7da421ef8f))
+
+
+
+
+
 ## [0.1.2](https://github.com/digikare/monorepo-libs/compare/@digikare/nestjs-azure-eventhub@0.1.1...@digikare/nestjs-azure-eventhub@0.1.2) (2020-11-06)
 
 
