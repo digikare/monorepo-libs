@@ -5,4 +5,5 @@ export enum EventHubProperties {
   PREFIX = 'eventhub_',
   NEST_IS_ERR = 'kafka_nest-err',
   NEST_IS_DISPOSED = 'kafka_nest-is-disposed',
+  TYPE = 'eventhub_type',
 }

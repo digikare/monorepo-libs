@@ -35,7 +35,7 @@ type EventHubFactoryConsumerOptions = FactoryOption<EventHubConsumerConfiguratio
 
 interface EventHubClientProxyConfiguration {
   connectionString: string;
-  eventHubName: string;
+  eventHubName?: string;
   options?: EventHubClientOptions;
 }
 
@@ -59,12 +59,18 @@ export class EventHubModule {
     const provider: Provider = {
       provide: options.provide,
       inject: [configToken],
-      useFactory: (opt?: EventHubClientProxyConfiguration) => {
-        if (opt?.connectionString && opt?.eventHubName) {
+      useFactory: (_options?: EventHubClientProxyConfiguration) => {
+        if (_options?.connectionString) {
+
+          const opts = {...(_options.options || {})};
+
+          if (opts.eventHubName === undefined && _options.eventHubName) {
+            opts.eventHubName = _options.eventHubName;
+          }
+
           return new EventHubClient(
-            opt.connectionString,
-            opt.eventHubName,
-            opt.options
+            _options.connectionString,
+            opts
           );
         }
         return undefined;

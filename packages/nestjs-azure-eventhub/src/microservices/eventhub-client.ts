@@ -4,12 +4,19 @@ import {
   WritePacket,
 } from '@nestjs/microservices';
 import { Logger } from '@nestjs/common';
-import { EventHubProducerClient, EventData, SendBatchOptions } from '@azure/event-hubs';
+import {
+  EventHubProducerClient,
+  EventData,
+  SendBatchOptions,
+  EventHubClientOptions as AzureEventHubClientOptions
+} from '@azure/event-hubs';
 import Debug from 'debug';
 import { EventHubProperties } from './contants';
 
 export interface EventHubClientOptions {
+  eventHubName?: string;
   partitionId?: string;
+  clientOptions?: AzureEventHubClientOptions;
 }
 
 export class EventHubClient extends ClientProxy {
@@ -21,12 +28,9 @@ export class EventHubClient extends ClientProxy {
 
   constructor(
     private readonly connectionString: string,
-    private readonly eventHubName: string,
     private readonly options?: EventHubClientOptions,
   ) {
     super();
-
-    this.debug = this.debug.extend(this.eventHubName);
 
     const debug = this.debug.extend('ctor');
 
@@ -47,10 +51,10 @@ export class EventHubClient extends ClientProxy {
       return this.producer;
     }
 
-    if (this.eventHubName) {
-      this.producer = new EventHubProducerClient(this.connectionString, this.eventHubName);
+    if (this.options?.eventHubName) {
+      this.producer = new EventHubProducerClient(this.connectionString, this.options.eventHubName, this.options.clientOptions);
     } else {
-      this.producer = new EventHubProducerClient(this.connectionString);
+      this.producer = new EventHubProducerClient(this.connectionString, this.options?.clientOptions);
     }
     return this.producer;
   }
@@ -71,7 +75,10 @@ export class EventHubClient extends ClientProxy {
       const pattern = this.normalizePattern(packet.pattern);
       debug('pattern', pattern);
 
-      const event: EventData = this.getEventData({ pattern, packet });
+      const event: EventData = this.getEventData({ pattern, packet, properties: {
+        [EventHubProperties.TOPIC]: pattern,
+        [EventHubProperties.TYPE]: 'event',
+      } });
       const sendOptions: SendBatchOptions = {};
       if (this.options?.partitionId) {
         sendOptions.partitionId = this.options.partitionId;
@@ -107,6 +114,7 @@ export class EventHubClient extends ClientProxy {
         properties: {
           [EventHubProperties.TOPIC]: pattern,
           [EventHubProperties.ID]: packet.id,
+          [EventHubProperties.TYPE]: 'message',
         }
       });
 
