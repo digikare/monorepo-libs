@@ -90,6 +90,45 @@ const app = await NestFactory.createMicroservice(ApplicationModule, {
 });
 ```
 
+#### Wildcard support on pattern
+
+Wildcard support on pattern can be usefull. When you receive a message, the client will cut out the topic of the event
+in order to check if handlers are subscribed to these topics.
+
+The restriction at the moment:
+
+- The wildcard char '*' must be at the end (eg: `audit.*`, 'my.scope.on.*`)
+- The split char is '.'
+
+To enable, just set `wildcardSuppprt` option to `true`
+
+```typescript
+import { EventHubServer } from '@digikare/nestjs-azure-eventhub';
+// other imports {...}
+
+const app = await NestFactory.createMicroservice(ApplicationModule, {
+  startegy: new EventHubServer(
+    '<connection_string>',            // the connection string
+    '<event_hub_name>',               // the event hub name
+    '<optional_consumer_group>',      // optionnal: The consumer group, the default value is $Default
+    {
+      partitionId: '<partition_id>',  // optional: the partitionId to listen
+      wildcardSupport: true,          // <<== Support wildcard
+    }
+  ),
+});
+```
+
+__Examples__
+
+If you send an event on the following topic : event.subevent.topic
+The handlePatternMessage will test the following topics :
+- `*`
+- `event.*`
+- `event.subevent`
+- `event.subevent.*`
+- `event.subevent.topic`
+
 ### Client
 
 ```typescript
@@ -127,31 +166,18 @@ Hint: When you define a partitionId, the configuration will override every messa
 ## Build
 
 ```bash
-# first install dependencies
+# To install dependencies, first go to root monorepo and run yarn
+$ cd ../../
 $ yarn
 
 # development
+$ cd packages/nestjs-azure-eventhub
 $ yarn build
 
 # watch mode
+$ cd packages/nestjs-azure-eventhub
 $ npm run dev
 ```
-
-## Message Pattern
-
-When enabling
-
-When you receive a message, the client will cut out the topic of the event in order to check if handlers are subscribed to these topics.
-
-### Examples
-
-If you send an event on the following topic : event.subevent.topic
-The handlePatternMessage will test the following topics :
-- *
-- event.*
-- event.subevent
-- event.subevent.*
-- event.subevent.topic
 
 ## License
 

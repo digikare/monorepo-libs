@@ -11,4 +11,14 @@ export class ReceiverController {
     this._logger.log(`======>> Receive event ${JSON.stringify(data)}`);
   }
 
+  @EventPattern('audit.*')
+  handleAuditEvent(data: any) {
+    this._logger.log(`[AUDIT] ======>> Receive event ${JSON.stringify(data)}`);
+  }
+
+  @EventPattern('*')
+  handleAllEvent(data: any) {
+    this._logger.log(`[ALL] ======>> Receive event ${JSON.stringify(data)}`);
+  }
+
 }

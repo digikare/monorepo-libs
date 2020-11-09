@@ -56,7 +56,12 @@ export interface EventHubCheckpointStore {
 export interface EventHubServerOptions {
   serializer?: Serializer;
   deserializer?: Deserializer;
+
+  /**
+   * @deprecated please set wildcardSupport field
+   */
   withWildcardSupport?: boolean;
+  wildcardSupport?: boolean;
 
   consumerClientOptions?: EventHubConsumerClientOptions;
 
@@ -89,7 +94,7 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
     this.initializeDeserializer(this.options);
     this.initializeSerializer(this.options);
 
-    this.wildcardSupport = this.options?.withWildcardSupport === true;
+    this.wildcardSupport = (this.options?.wildcardSupport ?? this.options?.withWildcardSupport) === true;
   }
 
   public close() {
@@ -157,10 +162,13 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
         } else {
           return;
         }
-        events.forEach((event) => this.handlePatternMessage(event, context));
+
+        for (const evt of events) {
+          await this.handlePatternMessage(evt, context);
+        }
 
         try {
-          if(this.options?.checkpointStore){
+          if (this.options?.checkpointStore){
             this.logger.debug("Update Checkpoint");
             await context.updateCheckpoint(events[events.length - 1]);
           }
@@ -209,30 +217,43 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
     event: ReceivedEventData,
     context: PartitionContext,
   ) {
+
+    const debug = this._debug.extend('handlePatternMessage');
+    const {
+      body,
+      properties,
+      partitionKey,
+      enqueuedTimeUtc,
+      sequenceNumber,
+      offset,
+    } = event;
+
+    debug(
+      `consumerGroup=${context.consumerGroup} - partitionId=${context.partitionId} partitionKey=${partitionKey} offset=${offset} enqueuedTimeUtc=${enqueuedTimeUtc} sequenceNumber=${sequenceNumber}`
+    );
+    debug('properties=', properties);
+    debug('body=', body);
+
     if (!this.wildcardSupport) {
-      this.handleMessage(event, context);
+      await this.handleMessage(event, context);
       return;
     }
 
+    // default emit message with *
+    await this.handleMessage(this.clonePacketForTopic(event, '*'), context);
+
     if (event.properties === undefined) {
-      this.handleMessage(event, context);
+      await this.handleMessage(event, context);
       return;
     }
 
     const splitPattern = event.properties.pattern.split('.');
-    for (let index = -1; index <= splitPattern.length; index++) {
-      if (index === -1) {
-        event.properties[EventHubProperties.TOPIC] = '*';
-        this.handleMessage(event, context);
-      } else {
-        const topic = splitPattern.slice(0, index).join('.');
-        if (topic !== '') {
-          event.properties[EventHubProperties.TOPIC] = topic;
-          this.handleMessage(event, context);
-          if (index !== splitPattern.length && splitPattern[index] !== '*') {
-            event.properties[EventHubProperties.TOPIC] = topic + '.*';
-            this.handleMessage(event, context);
-          }
+    for (let index = 0; index <= splitPattern.length; index++) {
+      const topic = splitPattern.slice(0, index).join('.');
+      if (topic !== '') {
+        await this.handleMessage(this.clonePacketForTopic(event, topic), context);
+        if (index !== splitPattern.length && splitPattern[index] !== '*') {
+          await this.handleMessage(this.clonePacketForTopic(event, topic + '.*'), context);
         }
       }
     }
@@ -304,6 +325,19 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
     );
   }
 
+  private clonePacketForTopic(
+    event: ReceivedEventData,
+    topic: string,
+  ): ReceivedEventData {
+    return {
+      ...event,
+      properties: {
+        ...(event.properties || {}),
+        [EventHubProperties.TOPIC]: topic,
+      }
+    }
+  }
+
   private async handleMessage(
     event: ReceivedEventData,
     context: PartitionContext,
@@ -312,19 +346,8 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
       body,
       properties,
       partitionKey,
-      enqueuedTimeUtc,
       sequenceNumber,
-      offset,
     } = event;
-
-    const debug = this._debug.extend('handleMessage');
-
-    debug(
-      `consumerGroup=${context.consumerGroup} - partitionId=${context.partitionId} partitionKey=${partitionKey} offset=${offset} enqueuedTimeUtc=${enqueuedTimeUtc} sequenceNumber=${sequenceNumber}`,
-      body,
-    );
-    debug('properties=', properties);
-    debug('body=', body);
 
     const rawMessage = JSON.parse(body.toString());
 
@@ -335,13 +358,15 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
       (properties && properties[EventHubProperties.TOPIC]) || packet.pattern;
     const ctx = new EventHubContext([context, pattern]);
 
-    if (!properties || properties[EventHubProperties.ID] === undefined) {
-      this.handleEvent(pattern, packet, ctx);
+    // no handle found
+    const handler = this.getHandlerByPattern(pattern);
+    if (!handler) {
       return;
     }
 
-    const handler = this.getHandlerByPattern(pattern);
-    if (!handler) {
+    // if not ID defined, it's an event
+    if (!properties || properties[EventHubProperties.ID] === undefined) {
+      this.handleEvent(pattern, packet, ctx);
       return;
     }
 

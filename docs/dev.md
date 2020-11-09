@@ -11,9 +11,10 @@ Dev guides
 
 ## Setup
 
+Simply run yarn on the root path folder of the monorepo.
+
 ```bash
 $ yarn
-$ yarn bootstrap
 ```
 
 ## How to create a new library
