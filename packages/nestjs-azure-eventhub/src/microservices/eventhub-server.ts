@@ -56,7 +56,12 @@ export interface EventHubCheckpointStore {
 export interface EventHubServerOptions {
   serializer?: Serializer;
   deserializer?: Deserializer;
+
+  /**
+   * @deprecated please set wildcardSupport field
+   */
   withWildcardSupport?: boolean;
+  wildcardSupport?: boolean;
 
   consumerClientOptions?: EventHubConsumerClientOptions;
 
@@ -89,7 +94,7 @@ export class EventHubServer extends Server implements CustomTransportStrategy {
     this.initializeDeserializer(this.options);
     this.initializeSerializer(this.options);
 
-    this.wildcardSupport = this.options?.withWildcardSupport === true;
+    this.wildcardSupport = (this.options?.wildcardSupport ?? this.options?.withWildcardSupport) === true;
   }
 
   public close() {

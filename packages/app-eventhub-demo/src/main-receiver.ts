@@ -18,7 +18,7 @@ async function bootstrapReceiver() {
       configService.get<string>('EVENT_HUB_LISTENER_NAME'),
       configService.get<string>('EVENT_HUB_LISTENER_CONSUMER_GROUP') ?? '$Default',
       {
-        withWildcardSupport: true,
+        wildcardSupport: true,
         partitionId: configService.get<string>('EVENT_HUB_LISTENER_PARTITION_ID'),
         checkpointStore: {
           connectionString: configService.get<string>('EVENT_HUB_LISTENER_CHECKPOINT_CONTAINER_CONNECTION_STRING'),
